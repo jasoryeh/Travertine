@@ -1,4 +1,4 @@
-From 9f476fbaacc4611a775a8a6c919bb6d12dfa0d29 Mon Sep 17 00:00:00 2001
+From 06a9d4d98bc824d661d94a4768f84ca6bfecb630 Mon Sep 17 00:00:00 2001
 From: jasoryeh <jasoryeh@gmail.com>
 Date: Tue, 27 Feb 2018 20:32:44 -0800
 Subject: [PATCH] Add md-5 Jenkins to retrieve modules
@@ -31,7 +31,7 @@ index 510b7354..62e82f71 100644
          }
  
 diff --git a/proxy/src/main/java/net/md_5/bungee/module/JenkinsModuleSource.java b/proxy/src/main/java/net/md_5/bungee/module/JenkinsModuleSource.java
-index e1cf0010..9219ddd5 100644
+index e1cf0010..b873491e 100644
 --- a/proxy/src/main/java/net/md_5/bungee/module/JenkinsModuleSource.java
 +++ b/proxy/src/main/java/net/md_5/bungee/module/JenkinsModuleSource.java
 @@ -18,7 +18,30 @@ public class JenkinsModuleSource implements ModuleSource
@@ -62,7 +62,7 @@ index e1cf0010..9219ddd5 100644
 +        System.out.println( "Attempting to Jenkins download module " + module.getName() + " v" + version.getBuild() + " from fallback build server");
 +        try
 +        {
-+            URL website = new URL( "https://ci.md-5.net/job/BungeeCord/" + version.getBuild() + "/artifact/module/" + module.getName().replace( '_', '-' ) + "/target/" + module.getName() + ".jar" );
++            URL website = new URL( "https://ci.md-5.net/job/BungeeCord/latestSuccessfulBuild/artifact/module/" + module.getName().replace( '_', '-' ) + "/target/" + module.getName() + ".jar" );
              URLConnection con = website.openConnection();
              // 15 second timeout at various stages
              con.setConnectTimeout( 15000 );
