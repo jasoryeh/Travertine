@@ -1,0 +1,98 @@
+From 9f476fbaacc4611a775a8a6c919bb6d12dfa0d29 Mon Sep 17 00:00:00 2001
+From: jasoryeh <jasoryeh@gmail.com>
+Date: Tue, 27 Feb 2018 20:32:44 -0800
+Subject: [PATCH] Add md-5 Jenkins to retrieve modules
+
+
+diff --git a/bootstrap/src/main/java/net/md_5/bungee/BungeeCordLauncher.java b/bootstrap/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
+index 510b7354..62e82f71 100644
+--- a/bootstrap/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
++++ b/bootstrap/src/main/java/net/md_5/bungee/BungeeCordLauncher.java
+@@ -8,10 +8,7 @@ import java.util.Date;
+ import java.util.concurrent.TimeUnit;
+ import joptsimple.OptionParser;
+ import joptsimple.OptionSet;
+-import net.md_5.bungee.api.ChatColor;
+ import net.md_5.bungee.api.ProxyServer;
+-import net.md_5.bungee.api.chat.ComponentBuilder;
+-import net.md_5.bungee.command.ConsoleCommandSender;
+ 
+ public class BungeeCordLauncher
+ {
+@@ -45,8 +42,8 @@ public class BungeeCordLauncher
+                 System.err.println( "*** Hey! This build is potentially outdated :( ***" );
+                 System.err.println( "*** Please check for a new build from https://ci.aquifermc.org/job/Travertine/ ***" );
+                 System.err.println( "*** Should this build be outdated, you will get NO support for it. ***" );
+-                System.err.println( "*** Server will start in 10 seconds ***" );
+-                Thread.sleep( TimeUnit.SECONDS.toMillis( 10 ) );
++                System.err.println( "*** Server will start in 3 seconds ***" ); // Originally 3, but 10 is too long
++                Thread.sleep( TimeUnit.SECONDS.toMillis( 3 ) ); // Originally 3
+             }
+         }
+ 
+diff --git a/proxy/src/main/java/net/md_5/bungee/module/JenkinsModuleSource.java b/proxy/src/main/java/net/md_5/bungee/module/JenkinsModuleSource.java
+index e1cf0010..9219ddd5 100644
+--- a/proxy/src/main/java/net/md_5/bungee/module/JenkinsModuleSource.java
++++ b/proxy/src/main/java/net/md_5/bungee/module/JenkinsModuleSource.java
+@@ -18,7 +18,30 @@ public class JenkinsModuleSource implements ModuleSource
+         System.out.println( "Attempting to Jenkins download module " + module.getName() + " v" + version.getBuild() );
+         try
+         {
+-            URL website = new URL( "https://ci.destroystokyo.com/job/Waterfall/" + version.getBuild() + "/artifact/Waterfall-Proxy/module/" + module.getName().replace( '_', '-' ) + "/target/" + module.getName() + ".jar" );
++            URL website = new URL( "https://ci.destroystokyo.com/job/Travertine/" + version.getBuild() + "/artifact/Waterfall-Proxy/module/" + module.getName().replace( '_', '-' ) + "/target/" + module.getName() + ".jar" );
++            URLConnection con = website.openConnection();
++            // 15 second timeout at various stages
++            con.setConnectTimeout( 15000 );
++            con.setReadTimeout( 15000 );
++            con.setRequestProperty( "User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36" );
++
++            Files.copy( con.getInputStream(), module.getFile().toPath(), StandardCopyOption.REPLACE_EXISTING );
++            System.out.println( "Download complete" );
++        } catch ( IOException ex )
++        {
++            System.out.println( "Failed to download: " + Util.exception( ex ) );
++            System.out.println( "Trying alternative Jenkins server" );
++            retrieveFallback( module, version );
++        }
++    }
++
++    @Override
++    public void retrieveFallback(ModuleSpec module, ModuleVersion version)
++    {
++        System.out.println( "Attempting to Jenkins download module " + module.getName() + " v" + version.getBuild() + " from fallback build server");
++        try
++        {
++            URL website = new URL( "https://ci.md-5.net/job/BungeeCord/" + version.getBuild() + "/artifact/module/" + module.getName().replace( '_', '-' ) + "/target/" + module.getName() + ".jar" );
+             URLConnection con = website.openConnection();
+             // 15 second timeout at various stages
+             con.setConnectTimeout( 15000 );
+diff --git a/proxy/src/main/java/net/md_5/bungee/module/ModuleManager.java b/proxy/src/main/java/net/md_5/bungee/module/ModuleManager.java
+index 8c5cc949..6b8da2c6 100644
+--- a/proxy/src/main/java/net/md_5/bungee/module/ModuleManager.java
++++ b/proxy/src/main/java/net/md_5/bungee/module/ModuleManager.java
+@@ -34,7 +34,8 @@ public class ModuleManager
+     @SuppressFBWarnings(
+             {
+                 "SF_SWITCH_FALLTHROUGH", "SF_SWITCH_NO_DEFAULT"
+-            })
++            }
++    )
+     public void load(ProxyServer proxy, File moduleDirectory) throws Exception
+     {
+         moduleDirectory.mkdir();
+diff --git a/proxy/src/main/java/net/md_5/bungee/module/ModuleSource.java b/proxy/src/main/java/net/md_5/bungee/module/ModuleSource.java
+index 09f5624c..9bbc3c0f 100644
+--- a/proxy/src/main/java/net/md_5/bungee/module/ModuleSource.java
++++ b/proxy/src/main/java/net/md_5/bungee/module/ModuleSource.java
+@@ -4,4 +4,8 @@ interface ModuleSource
+ {
+ 
+     void retrieve(ModuleSpec module, ModuleVersion version);
++
++    // In case first retrieve fails, we use md-5 to still be able to download modules
++    void retrieveFallback(ModuleSpec module, ModuleVersion version);
++
+ }
+-- 
+2.14.2.windows.1
+
