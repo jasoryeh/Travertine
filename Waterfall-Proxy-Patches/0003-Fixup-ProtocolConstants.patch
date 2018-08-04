@@ -1,16 +1,16 @@
-From 2d5662b851b99d412b9675c75301ac484041515a Mon Sep 17 00:00:00 2001
+From 5adbaea1b5db0b403749e7f4c9a5c0ebe7c2df67 Mon Sep 17 00:00:00 2001
 From: Troy Frew <fuzzy_bot@arenaga.me>
 Date: Tue, 15 Nov 2016 09:07:51 -0500
 Subject: [PATCH] Fixup ProtocolConstants
 
 
 diff --git a/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java b/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
-index ac9adf33..a9398eef 100644
+index b2dc9423..c23b1947 100644
 --- a/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
 +++ b/protocol/src/main/java/net/md_5/bungee/protocol/ProtocolConstants.java
-@@ -24,7 +24,8 @@ public class ProtocolConstants
-             "1.11.x",
-             "1.12.x"
+@@ -26,7 +26,8 @@ public class ProtocolConstants
+             "1.12.x",
+             "1.13.x"
      );
 -    public static final List<Integer> SUPPORTED_VERSION_IDS = Arrays.asList( ProtocolConstants.MINECRAFT_1_8,
 +    public static final List<Integer> SUPPORTED_VERSION_IDS = Arrays.asList(
@@ -18,8 +18,8 @@ index ac9adf33..a9398eef 100644
              ProtocolConstants.MINECRAFT_1_9,
              ProtocolConstants.MINECRAFT_1_9_1,
              ProtocolConstants.MINECRAFT_1_9_2,
-@@ -37,6 +38,16 @@ public class ProtocolConstants
-             ProtocolConstants.MINECRAFT_1_12_2
+@@ -40,6 +41,16 @@ public class ProtocolConstants
+             ProtocolConstants.MINECRAFT_1_13
      );
  
 +    public static final boolean isBeforeOrEq(int before, int other)
@@ -36,5 +36,5 @@ index ac9adf33..a9398eef 100644
      {
  
 -- 
-2.14.2
+2.18.0
 
